@@ -8,8 +8,8 @@ import (
 	"ngrok/client/lib/tcpClient"
 )
 
-const TcpAddr = "47.111.175.196:22222"
-//const TcpAddr = "127.0.0.1:22222"
+
+const TcpAddr = "您的服务端IP:22222"
 
 func main() {
 
