@@ -9,11 +9,6 @@ import (
 	"ngrok/server/lib/utils"
 )
 
-const IP="0.0.0.0"
-const PORT = 22222
-const NETWORK="tcp"
-
-
 var counter	 *utils.TcpCount
 /**
  初始化tcp的维护表
@@ -27,9 +22,9 @@ func init(){
  *	tcpServer server 启动
  */
 func Bootstrap()  {
-	addr := fmt.Sprintf("%v:%v",IP,PORT)
+	addr := fmt.Sprintf(":%s",utils.GetSection(utils.WebSection).Key("TCP_PORT").String())
 	//启动tcp监听
-	listen ,err := net.Listen(NETWORK,addr)
+	listen ,err := net.Listen("tcp",addr)
 	if err !=nil{
 		log.Panicln("tcpServer listen err: ",err)
 		return
@@ -52,7 +47,7 @@ func process(conn net.Conn){
 	fid := counter.IncrTcpCount() //增加fid
 	//更新链接表
 	utils.TcpConnectMap.SetNewConnectMap(fid,conn)
-
+	logrus.Info("有一个新的链接,fid:",fid)
 	//循环从buff读取数据
 	for{
 		//拆包处理

@@ -2,23 +2,25 @@ package httpServer
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"ngrok/server/lib/message"
+	"ngrok/server/lib/utils"
 	"strings"
 	"time"
 )
 
-const ADDR =  ":12138"
 
 /**
  http server
  */
 func Bootstrap(){
-	logrus.Info("HTTP SERVER START SUCCESS,ADDR :",ADDR)
+	addr := fmt.Sprintf(":%s",utils.GetSection(utils.WebSection).Key("HTTP_PORT").String())
+	logrus.Info("HTTP SERVER START SUCCESS,ADDR :",addr)
 	http.HandleFunc("/",httpHandle)
-	if err := http.ListenAndServe(ADDR, nil);err!=nil{
+	if err := http.ListenAndServe(addr, nil);err!=nil{
 		logrus.Fatal("http start fail, err:",err)
 	}
 }

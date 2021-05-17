@@ -1,5 +1,5 @@
-client/bin/run
 client/.idea
-server/bin/run
 server/.idea
 .idea
+server/bin/*
+client/bin/*

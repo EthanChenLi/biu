@@ -12,7 +12,8 @@ import (
 
 
 func init(){
-	fmt.Println(ctc.ForegroundRed,`_____   _____   _       _____   _____   __   _        _____   __   _   _   _____   _____   _   _  
+	fmt.Println(ctc.ForegroundRed,
+`_____   _____   _       _____   _____   __   _        _____   __   _   _   _____   _____   _   _  
 /  ___| /  _  \ | |     |  _  \ | ____| |  \ | |      /  ___/ |  \ | | | | |_   _| /  ___| | | | | 
 | |     | | | | | |     | | | | | |__   |   \| |      | |___  |   \| | | |   | |   | |     | |_| | 
 | |  _  | | | | | |     | | | | |  __|  | |\   |      \___  \ | |\   | | |   | |   | |     |  _  | 
@@ -25,7 +26,8 @@ func init(){
 	utils.InitTcpDomainMap()
 	//初始化TCP链接维护表
 	utils.InitTcpConnectMap()
-
+	//读取配置
+	utils.NewConfig()
 }
 
 func main() {

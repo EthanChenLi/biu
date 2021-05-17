@@ -14,16 +14,14 @@ import (
 )
 
 
-
-
-var TargetIp string
-var TargetPort string
-var TargetHost string
-
 /**
  tcp 客户端
  */
-func Bootstrap(tcpAdd string){
+func Bootstrap(){
+	tcpAdd := fmt.Sprintf("%s:%s",
+		utils.GetSection(utils.BaseSection).Key("SERVER_IP").String(),
+		utils.GetSection(utils.WebSection).Key("SERVER_PORT").String(),
+		)
 	conn,err := net.Dial("tcp", tcpAdd)
 	if err!=nil{
 		logrus.Panic("tcp dial fail, err:",err)
@@ -31,7 +29,7 @@ func Bootstrap(tcpAdd string){
 	}
 	//初始化链接消息
 	content ,_ :=utils.Encode(utils.BuildTcpMessage(
-		utils.TCP_MESSAGE_TYPE_INIT,TargetHost,nil,
+		utils.TCP_MESSAGE_TYPE_INIT,utils.GetSection(utils.BaseSection).Key("KEY").String(),nil,
 		))
 	_, err =conn.Write(content)
 	if err!=nil{
@@ -39,7 +37,7 @@ func Bootstrap(tcpAdd string){
 		return
 	}
 
-	logrus.Info("tcp连接成功")
+	logrus.Info("服务器连接成功")
 	go CreateTcpHeader(conn) //创建心跳任务
 	//读取服务端消息
 
@@ -48,8 +46,8 @@ func Bootstrap(tcpAdd string){
 		//拆包处理
 		tcpMessage, err := utils.Decode(conn)
 		if err != nil {
-			logrus.Warning("TCP READY ERROR:",err)
-			conn.Close()
+			_ = conn.Close()
+			utils.ErrorQueue<-err //异常退出
 			break
 		}
 		go messageHandle(tcpMessage,conn)
@@ -57,13 +55,11 @@ func Bootstrap(tcpAdd string){
 }
 
 func messageHandle(msg *utils.TcpMessage,conn net.Conn){
-
-
    data := &message.HttpMessage{}
    json.Unmarshal([]byte(msg.BodyStruct.Content),&data)
    logrus.Info("tcp发来的消息：",data)
-
-   targetUrl:=fmt.Sprintf("http://%s:%s",TargetIp,TargetPort)+data.HttpRequest.RequestUri
+   webAddr := utils.GetSection(utils.WebSection).Key("WEB_ADDR").String()
+   targetUrl:=fmt.Sprintf("http://%s%s",webAddr,data.HttpRequest.RequestUri)
    logrus.Info("目标请求HTTP地址：",targetUrl)
 
    req,err:= http.NewRequest(data.HttpRequest.Method,targetUrl,bytes.NewBuffer(data.HttpRequest.Body))
