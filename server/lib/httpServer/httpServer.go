@@ -29,12 +29,10 @@ func Bootstrap(){
 //http请求处理
 func httpHandle(response http.ResponseWriter , request *http.Request){
 		ctx,cancel := context.WithTimeout(context.Background(), 60 * time.Second)
+		defer cancel()
 		body, _ := ioutil.ReadAll(request.Body)
 		//写入数据
-		logrus.Println("收到HTTP消息，写入管道")
-		messageId := time.Now().UnixNano()
 		message.HttpMessageQueue<-message.HttpMessage{
-			MessageId: messageId,
 			MessageType:  message.MESSAGE_TYPE_HTTP,
 			TargetKey: getUrlKey(request.Host),
 			HttpRequest:  message.HttpRequest{
@@ -67,7 +65,6 @@ func httpHandle(response http.ResponseWriter , request *http.Request){
 				_,_ =response.Write([]byte("Target Page does not exist or client is closed"))
 			case <-ctx.Done():
 				//请求超时
-				cancel()
 				logrus.Info("HTTP请求超时")
 				//响应404请求
 				response.WriteHeader(http.StatusRequestTimeout)

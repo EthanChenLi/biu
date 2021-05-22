@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-const HEADER_TIME_INTERVAL = 2 //时间间隔
-const HEADER_TIMEOUT = 11 //超时时间（秒）
+const HEADER_TIME_INTERVAL = 5 //时间间隔
+const HEADER_TIMEOUT = 20 //超时时间（秒）
 
 
 //tcp  心跳包

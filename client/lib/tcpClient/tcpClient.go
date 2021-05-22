@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"ngrok/client/lib/message"
 	"ngrok/client/lib/utils"
+	"time"
 )
 
 
@@ -57,13 +58,11 @@ func Bootstrap(){
 func messageHandle(msg *utils.TcpMessage,conn net.Conn){
    data := &message.HttpMessage{}
    json.Unmarshal([]byte(msg.BodyStruct.Content),&data)
-   logrus.Info("tcp发来的消息：",data)
    webAddr := utils.GetSection(utils.WebSection).Key("WEB_ADDR").String()
-   targetUrl:=fmt.Sprintf("http://%s%s",webAddr,data.HttpRequest.RequestUri)
-   logrus.Info("目标请求HTTP地址：",targetUrl)
-
+   targetUrl := fmt.Sprintf("http://%s%s",webAddr,data.HttpRequest.RequestUri)
+   //打印日志
+   go writeLog(data,targetUrl)
    req,err:= http.NewRequest(data.HttpRequest.Method,targetUrl,bytes.NewBuffer(data.HttpRequest.Body))
-
    if err !=nil {
    	 logrus.Warning("htt request err:",err)
 	   return
@@ -91,7 +90,21 @@ func messageHandle(msg *utils.TcpMessage,conn net.Conn){
 
 	//回复给server端
 	 content ,_ :=utils.Encode(
-	 	utils.BuildTcpMessage(data.MessageId,httpContentByBase64,resp.Header),
+	 	utils.BuildTcpMessage(msg.MessageId,httpContentByBase64,resp.Header),
 	 	)
 	_, _ = conn.Write(content)
+}
+
+//打印日志
+func writeLog(data *message.HttpMessage,targetUrl string){
+	logrus.Info("[REQUEST]==========================")
+	logrus.Info("DATE: ",time.Now().Format("2006-01-02 15:04:05"))
+	logrus.Info("TARGET URL: ",targetUrl)
+	logrus.Info("METHOD: ",data.HttpRequest.Method)
+	logrus.Info("HEADER: ")
+	for key,item := range data.HttpRequest.Header{
+		logrus.Info("  ",key,":",item[0])
+	}
+	logrus.Info("BODY: ",string(data.HttpRequest.Body))
+	logrus.Info("==========================")
 }

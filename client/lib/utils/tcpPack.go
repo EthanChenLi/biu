@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"io"
 	"net"
 )
@@ -59,7 +58,7 @@ func Decode(conn net.Conn) (*TcpMessage, error) {
 	if err != nil{
 		return nil,err
 	}
-	logrus.Info("收到的原始消息:",string(body))
+	//logrus.Info("收到的原始消息:",string(body))
 	//解析tcpMessage的body内容
 	tcpBody := &TcpBody{}
 	if err := json.Unmarshal(body,&tcpBody); err!=nil{

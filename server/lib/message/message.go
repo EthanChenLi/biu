@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"ngrok/server/lib/utils"
+	"time"
 )
 
 const MESSAGE_TYPE_HTTP = "HTTP"
@@ -24,7 +25,6 @@ type HttpResponse struct {
 
 
 type HttpMessage struct {
-	MessageId int64 //消息ID
 	MessageType string //消息类型  TCP HTTP
 	TargetKey string  //目标地址的KEY
 	HttpRequest HttpRequest
@@ -76,8 +76,9 @@ func pushHttpContent(request HttpMessage){
 			return
 		}
 		//使用编码
+		messageId := time.Now().UnixNano()
 		content ,_ :=utils.Encode(utils.BuildTcpMessage(
-			utils.TCP_MESSAGE_TYPE_INIT,string(requestByte),nil,
+			messageId,string(requestByte),nil,
 		))
 		_, _ = conn.Conn.Write(content) //发送给TCP客户端
 
